@@ -59,8 +59,8 @@ namespace RedditSportsAggregator.Controllers
             return gameDtos;
         }
 
-        // GET: api/sports/{sport}/leagues/{league}/games?gameId="{gameId}"
-        [HttpGet("{sport}/leagues/{league}/games/game", Name = "GetPosts")]
+        // GET: api/sports/{sport}/leagues/{league}/games/game/{gameId}"
+        [HttpGet("{sport}/leagues/{league}/games/game/{gameId}", Name = "GetPosts")]
         public ActionResult<List<PostDto>> GetPosts(string sport, string league, string gameId)
         {
             if (!_rsaService.GetSports().Any(s => s.Name.ToLower() == sport.ToLower()) ||

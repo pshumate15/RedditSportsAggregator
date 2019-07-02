@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using RedditSportsAggregator.Models;
+using RedditSportsAggregator.Models.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,24 +44,25 @@ namespace RedditSportsAggregator.Models
             List<Game> games = new List<Game>();
 
             League league = GetLeague(leagueName);
-            dynamic jsonObj = GetJsonResponse(league);
+            string json = GetJsonResponse(league);
+            var thread = JsonConvert.DeserializeObject<Thread>(json);
 
-            if (jsonObj == null) return games;
+            if (thread == null) return games;
 
-            foreach (var obj in jsonObj.data.children)
+            foreach (var post in thread.Data.Children)
             {
                 // If the flair is Game Thread and the game thread was saved today
-                if (obj.data.link_flair_text.ToString() == "Game Thread" &&
-                        new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(double.Parse(obj.data.created_utc.ToString()))
+                if (post.ChildData.LinkFlairText == "Game Thread" &&
+                        new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(post.ChildData.CreatedUtc)
                         > DateTime.Today)
                 {
                     Game game = new Game();
 
-                    game.Name = obj.data.title;
-                    string gameId = obj.data.name;
+                    game.Name = post.ChildData.Title;
+                    string gameId = post.ChildData.Name;
                     game.GameId = gameId.Split('_').Last();
                     game.CreatedUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                        .AddSeconds(double.Parse(obj.data.created_utc.ToString()));
+                        .AddSeconds(post.ChildData.CreatedUtc);
                     game.League = league;
 
                     games.Add(game);
@@ -72,23 +74,24 @@ namespace RedditSportsAggregator.Models
 
         public List<Post> GetPosts(string leagueName, string gameId)
         {
-            string regex = @"(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])";
+            string regex = @"\b(?:https?://)?(?:(?i:[a-z]+\.)+)[^\s,]+\b";
 
             List<Post> posts = new List<Post>();
 
             League league = GetLeague(leagueName);
-            dynamic jsonObj = GetJsonResponse(league, gameId);
+            string json = GetJsonResponse(league, gameId);
+            var thread = JsonConvert.DeserializeObject<List<Thread>>(json);
 
-            if (jsonObj == null) return posts;
+            if (thread == null) return posts;
 
-            foreach (var obj in jsonObj.data.children)
+            foreach (var comment in thread[1].Data.Children)
             {
-                if (Regex.Match(obj.data.body.ToString(), regex).Success)
+                if (Regex.Match(comment.ChildData.Body, regex).Success)
                 {
                     Post post = new Post();
-                    MatchCollection matches = Regex.Matches(obj.data.body.ToString(), regex);
+                    MatchCollection matches = Regex.Matches(comment.ChildData.Body, regex);
 
-                    post.Author = obj.data.author;
+                    post.Author = comment.ChildData.Author;
 
                     foreach(Match match in matches)
                     {
@@ -98,9 +101,9 @@ namespace RedditSportsAggregator.Models
                     post.Game = new Game
                     {
                         GameId = gameId,
-                        Name = obj.data.children[0].title,
+                        Name = thread[0].Data.Children[0].ChildData.Title,
                         CreatedUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                            .AddSeconds(double.Parse(obj.data.children[0].created_utc.ToString())),
+                            .AddSeconds(thread[0].Data.Children[0].ChildData.CreatedUtc),
                         League = league
                     };
 
@@ -111,9 +114,9 @@ namespace RedditSportsAggregator.Models
             return posts;
         }
 
-        private dynamic GetJsonResponse(League league, string gameId = null)
+        private string GetJsonResponse(League league, string gameId = null)
         {
-            var url = gameId == null ? league.Url : league.Url + $"/comments/{gameId}/";
+            var url = gameId == null ? league.Url + ".json" : league.Url + $"/comments/{gameId}.json";
 
             using (var client = new HttpClient())
             {
@@ -121,8 +124,7 @@ namespace RedditSportsAggregator.Models
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return JsonConvert.DeserializeObject(
-                        response.Content.ReadAsStringAsync().Result);
+                    return response.Content.ReadAsStringAsync().Result;
                 }
             }
 

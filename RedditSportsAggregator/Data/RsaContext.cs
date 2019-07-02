@@ -55,7 +55,7 @@ namespace RedditSportsAggregator.Models
             var mlb = new League
             {
                 Name = "Mlb",
-                Url = "https://www.reddit.com/r/MLBStreams.json?sort=top",
+                Url = "https://www.reddit.com/r/MLBStreams",
                 Sport = Sports.Where(s => s.Name == "Baseball").FirstOrDefault()
             };
 
@@ -65,7 +65,7 @@ namespace RedditSportsAggregator.Models
             var nhl = new League
             {
                 Name = "Nhl",
-                Url = "https://www.reddit.com/r/NHLStreams.json?sort=top",
+                Url = "https://www.reddit.com/r/NHLStreams",
                 Sport = Sports.Where(s => s.Name == "Hockey").FirstOrDefault()
             };
             Sports.Where(s => s.Name == "Hockey").FirstOrDefault().Leagues.Add(nhl);

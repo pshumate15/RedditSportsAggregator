@@ -74,7 +74,7 @@ namespace RedditSportsAggregator.Models
 
         public List<Post> GetPosts(string leagueName, string gameId)
         {
-            string regex = @"\b(?:https?://)?(?:(?i:[a-z]+\.)+)[^\s,]+\b";
+            string regex = @"(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?";
 
             List<Post> posts = new List<Post>();
 
@@ -86,7 +86,7 @@ namespace RedditSportsAggregator.Models
 
             foreach (var comment in thread[1].Data.Children)
             {
-                if (Regex.Match(comment.ChildData.Body, regex).Success)
+                if (Regex.Match(comment.ChildData.Body, regex).Success && comment.ChildData.Author != "AutoModerator")
                 {
                     Post post = new Post();
                     MatchCollection matches = Regex.Matches(comment.ChildData.Body, regex);

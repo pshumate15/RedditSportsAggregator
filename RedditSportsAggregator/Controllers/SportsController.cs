@@ -14,10 +14,9 @@ namespace RedditSportsAggregator.Controllers
         private readonly RsaService _rsaService;
         private readonly IUrlHelper _urlHelper;
 
-        public SportsController(RsaService rsaService, IUrlHelper urlHelper/*LinkGenerator linkGenerator*/)
+        public SportsController(RsaService rsaService, IUrlHelper urlHelper)
         {
             _rsaService = rsaService;
-            //_linkGenerator = linkGenerator;
             _urlHelper = urlHelper;
         }
         

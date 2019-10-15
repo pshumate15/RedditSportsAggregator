@@ -59,7 +59,7 @@ namespace RedditSportsAggregator.Models
             // Add baseball leagues
             var mlb = new League
             {
-                Name = "Mlb",
+                Name = "MLB",
                 Url = "https://www.reddit.com/r/MLBStreams",
                 Sport = Sports.Where(s => s.Name == "Baseball").FirstOrDefault()
             };
@@ -68,7 +68,7 @@ namespace RedditSportsAggregator.Models
             // Add hockey leagues
             var nhl = new League
             {
-                Name = "Nhl",
+                Name = "NHL",
                 Url = "https://www.reddit.com/r/NHLStreams",
                 Sport = Sports.Where(s => s.Name == "Hockey").FirstOrDefault()
             };
@@ -77,7 +77,7 @@ namespace RedditSportsAggregator.Models
             // Add football leagues
             var nfl = new League
             {
-                Name = "Nfl",
+                Name = "NFL",
                 Url = "https://www.reddit.com/r/nflstreams/",
                 Sport = Sports.Where(s => s.Name == "Football").FirstOrDefault()
             };

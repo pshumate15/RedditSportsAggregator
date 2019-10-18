@@ -52,9 +52,7 @@ namespace RedditSportsAggregator.Models
             foreach (var post in thread.Data.Children)
             {
                 // If the flair is Game Thread and the game thread was saved today
-                if (post.ChildData.LinkFlairText == "Game Thread" &&
-                        new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(post.ChildData.CreatedUtc)
-                        > DateTime.Today)
+                if (post.ChildData.LinkFlairText == "Game Thread")
                 {
                     Game game = new Game();
 

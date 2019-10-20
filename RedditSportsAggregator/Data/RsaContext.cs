@@ -78,7 +78,7 @@ namespace RedditSportsAggregator.Models
             var nfl = new League
             {
                 Name = "NFL",
-                Url = "https://www.reddit.com/r/nflstreams/",
+                Url = "https://www.reddit.com/r/nflstreams",
                 Sport = Sports.Where(s => s.Name == "Football").FirstOrDefault()
             };
             Sports.Where(s => s.Name == "Football").FirstOrDefault().Leagues.Add(nfl);

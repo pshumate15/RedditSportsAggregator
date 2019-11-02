@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using RedditSportsAggregator.Models;
+using RedditSportsAggregator.Services;
 
 namespace RedditSportsAggregator.Controllers
 {
@@ -69,6 +70,15 @@ namespace RedditSportsAggregator.Controllers
             }
 
             List<PostDto> postDtos = _rsaService.GetPosts(league, gameId).Select(p => CreatePostDtoWithLinks(p)).ToList();
+
+            // Bilasport is a dependable source, so place them first in the list
+            var bilasportIndex = postDtos.FindIndex(p => p.Author == "Bilasport");
+            if (bilasportIndex != -1) // FindIndex returns -1 if the element isn't found
+            {
+                var bilasport = postDtos[bilasportIndex];
+                postDtos.RemoveAt(bilasportIndex);
+                postDtos.Insert(0, bilasport);
+            }
 
             return postDtos;
         }

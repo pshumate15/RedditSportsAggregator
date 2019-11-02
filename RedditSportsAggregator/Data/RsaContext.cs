@@ -22,6 +22,7 @@ namespace RedditSportsAggregator.Models
         {
             get
             {
+                // Possibly multiple leagues for each sport, so flatten the leagues for each sport into one list
                 var flatLeagues = new List<League>();
 
                 foreach(List<League> leagueList in Sports.Select(s => s.Leagues).ToList())

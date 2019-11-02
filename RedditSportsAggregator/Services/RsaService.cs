@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RedditSportsAggregator.Models;
 using RedditSportsAggregator.Models.Json;
 using System;
@@ -8,7 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 
-namespace RedditSportsAggregator.Models
+namespace RedditSportsAggregator.Services
 {
     public class RsaService
     {
@@ -51,7 +50,6 @@ namespace RedditSportsAggregator.Models
 
             foreach (var post in thread.Data.Children)
             {
-                // If the flair is Game Thread and the game thread was saved today
                 if (post.ChildData.LinkFlairText == "Game Thread")
                 {
                     Game game = new Game();
@@ -72,7 +70,7 @@ namespace RedditSportsAggregator.Models
 
         public List<Post> GetPosts(string leagueName, string gameId)
         {
-            string regex = @"(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?";
+            string linkFinderRegex = @"(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?";
 
             List<Post> posts = new List<Post>();
 
@@ -82,16 +80,20 @@ namespace RedditSportsAggregator.Models
 
             if (thread == null) return posts;
 
+            // Loop over comments to find those that have stream links
             foreach (var comment in thread[1].Data.Children)
             {
-                if (Regex.Match(comment.ChildData.Body, regex).Success && comment.ChildData.Author != "AutoModerator")
+                // AutoModerator comments do not contain useful links
+                if (Regex.Match(comment.ChildData.Body, linkFinderRegex).Success && comment.ChildData.Author != "AutoModerator")
                 {
-                    Post post = new Post();
-                    MatchCollection matches = Regex.Matches(comment.ChildData.Body, regex);
+                    Post post = new Post()
+                    {
+                        Author = comment.ChildData.Author
+                    };
 
-                    post.Author = comment.ChildData.Author;
+                    MatchCollection matches = Regex.Matches(comment.ChildData.Body, linkFinderRegex);
 
-                    foreach(Match match in matches)
+                    foreach (Match match in matches)
                     {
                         post.Streams.Add(match.Value);
                     }

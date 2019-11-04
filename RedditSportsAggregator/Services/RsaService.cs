@@ -53,8 +53,9 @@ namespace RedditSportsAggregator.Services
                 if (post.ChildData.LinkFlairText == "Game Thread")
                 {
                     Game game = new Game();
-
-                    game.Name = post.ChildData.Title;
+					
+					// Remove "Game Thread: " from name as it messes with display
+                    game.Name = post.ChildData.Title.Replace("Game Thread: ", "");
                     string gameId = post.ChildData.Name;
                     game.GameId = gameId.Split('_').Last();
                     game.CreatedUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)

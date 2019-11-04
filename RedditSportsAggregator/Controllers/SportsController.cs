@@ -91,8 +91,7 @@ namespace RedditSportsAggregator.Controllers
             };
 
             sportDto.Links.Add(new Link(
-                _urlHelper.Link(nameof(GetLeagues),
-                    new { sport = sport.Name }).ToLower(),
+                _urlHelper.Link(nameof(GetLeagues), new { sport = sport.Name }).ToLower(),
                 "leagues",
                 "GET"));
 
@@ -107,8 +106,7 @@ namespace RedditSportsAggregator.Controllers
             };
 
             leagueDto.Links.Add(new Link(
-                _urlHelper.Link(nameof(GetGames),
-                new { sport = league.Sport.Name, league = league.Name }).ToLower(),
+                _urlHelper.Link(nameof(GetGames), new { sport = league.Sport.Name, league = league.Name }).ToLower(),
                 "games",
                 "GET"));
 
@@ -124,8 +122,7 @@ namespace RedditSportsAggregator.Controllers
             };
 
             gameDto.Links.Add(new Link(
-                _urlHelper.Link(nameof(GetPosts), 
-                    new { sport = game.League.Sport.Name, league = game.League.Name, gameId = game.GameId }).ToLower(),
+                _urlHelper.Link(nameof(GetPosts), new { sport = game.League.Sport.Name, league = game.League.Name, gameId = game.GameId }).ToLower(),
                 "posts",
                 "GET"));
 

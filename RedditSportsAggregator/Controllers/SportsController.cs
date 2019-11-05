@@ -59,7 +59,7 @@ namespace RedditSportsAggregator.Controllers
             return gameDtos;
         }
 
-        // GET: api/sports/{sport}/leagues/{league}/games/game/{gameId}"
+        // GET: api/sports/{sport}/leagues/{league}/games/game/{gameId}
         [HttpGet("{sport}/leagues/{league}/games/game/{gameId}", Name = "GetPosts")]
         public ActionResult<List<PostDto>> GetPosts(string sport, string league, string gameId)
         {

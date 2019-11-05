@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RedditSportsAggregator.Models.Json
 {
-    public class ThreadChildData
+    public class ChildDataJsonObj
     {
         [JsonProperty("author")]
         public string Author { get; set; }

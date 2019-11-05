@@ -44,11 +44,11 @@ namespace RedditSportsAggregator.Services
 
             League league = GetLeague(leagueName);
             string json = GetJsonResponse(league);
-            var thread = JsonConvert.DeserializeObject<Thread>(json);
+            var parentJsonObj = JsonConvert.DeserializeObject<ParentJsonObj>(json);
 
-            if (thread == null) return games;
+            if (parentJsonObj == null) return games;
 
-            foreach (var post in thread.Data.Children)
+            foreach (var post in parentJsonObj.Data.Children)
             {
                 if (post.ChildData.LinkFlairText == "Game Thread")
                 {
@@ -72,27 +72,34 @@ namespace RedditSportsAggregator.Services
         public List<Post> GetPosts(string leagueName, string gameId)
         {
             string linkFinderRegex = @"(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?";
+			List<string> invalidAuthors = new List<string>
+			{
+				"AutoModerator"
+			};
 
-            List<Post> posts = new List<Post>();
+			List<Post> posts = new List<Post>();
 
             League league = GetLeague(leagueName);
             string json = GetJsonResponse(league, gameId);
-            var thread = JsonConvert.DeserializeObject<List<Thread>>(json);
+            var parentJsonObjs = JsonConvert.DeserializeObject<List<ParentJsonObj>>(json);
 
-            if (thread == null) return posts;
+            if (parentJsonObjs == null) return posts;
+
+			// Filter deserialized response to get comments that do not contain an invalid author
+			var comments = parentJsonObjs[1].Data.Children;
+			comments = comments.Where(c => !invalidAuthors.Contains(c.ChildData.Author)).ToList();
 
             // Loop over comments to find those that have stream links
-            foreach (var comment in thread[1].Data.Children)
+            foreach (var comment in comments)
             {
-                // AutoModerator comments do not contain useful links
-                if (Regex.Match(comment.ChildData.Body, linkFinderRegex).Success && comment.ChildData.Author != "AutoModerator")
+				MatchCollection matches = Regex.Matches(comment.ChildData.Body, linkFinderRegex);
+
+				if (matches.Count > 0)
                 {
                     Post post = new Post()
                     {
                         Author = comment.ChildData.Author
                     };
-
-                    MatchCollection matches = Regex.Matches(comment.ChildData.Body, linkFinderRegex);
 
                     foreach (Match match in matches)
                     {
@@ -102,9 +109,9 @@ namespace RedditSportsAggregator.Services
                     post.Game = new Game
                     {
                         GameId = gameId,
-                        Name = thread[0].Data.Children[0].ChildData.Title,
+                        Name = parentJsonObjs[0].Data.Children[0].ChildData.Title,
                         CreatedUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                            .AddSeconds(thread[0].Data.Children[0].ChildData.CreatedUtc),
+                            .AddSeconds(parentJsonObjs[0].Data.Children[0].ChildData.CreatedUtc),
                         League = league
                     };
 
@@ -121,11 +128,12 @@ namespace RedditSportsAggregator.Services
 
             using (var client = new HttpClient())
             {
-                var response = client.GetAsync(url).Result;
+				// Need to implement async properly
+				var response = client.GetAsync(url).Result; // .Get() does not exist. Have to use async
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return response.Content.ReadAsStringAsync().Result;
+                    return response.Content.ReadAsStringAsync().Result; // ReadAsString() does not exist. Have to use async
                 }
             }
 
